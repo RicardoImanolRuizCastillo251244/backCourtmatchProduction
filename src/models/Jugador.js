@@ -1,0 +1,56 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db'); 
+const bcrypt = require('bcryptjs'); 
+
+const Jugador = sequelize.define('Jugador', {
+    idUser: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    nombreUsuario: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
+    correo: { 
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true 
+    },
+    contrasena: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    ubicacion: { 
+        type: DataTypes.ENUM('copoya', 'jobo', 'TuxtlaGTZ', 'Comitan', 'villacorzo'), 
+        allowNull: false
+    },
+    idDeporteFavorito: { 
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'deportes',
+            key: 'idDeporte'
+        }
+    },
+    partidosGanados: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    partidosJugados: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    }
+}, {
+    tableName: 'jugadores',
+    timestamps: false,
+    hooks: {
+        beforeCreate: async (jugador) => {
+            const salt = await bcrypt.genSalt(10);
+            jugador.contrasena = await bcrypt.hash(jugador.contrasena, salt);
+        }
+    }
+});
+
+module.exports = Jugador;
