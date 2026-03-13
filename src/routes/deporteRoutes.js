@@ -6,4 +6,4 @@ router.get('/', deporteController.obtenerDeportes);
 
 router.post('/crear', deporteController.crearDeporte);
 
-module.exports = router;
+module.exports = router;    

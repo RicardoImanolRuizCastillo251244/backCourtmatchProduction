@@ -17,11 +17,19 @@ const Lugar = sequelize.define('Lugar', {
     },
     idUser: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'jugadores', 
+            key: 'idUser'
+        }
     },
     idDeporte: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'deportes',
+            key: 'idDeporte'
+        }
     }
 }, {
     tableName: 'lugares',

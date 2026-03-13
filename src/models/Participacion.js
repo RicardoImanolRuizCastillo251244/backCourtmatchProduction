@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
 const Participacion = sequelize.define('Participacion', {
-    id: {
+    idParticipacion: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -10,6 +10,14 @@ const Participacion = sequelize.define('Participacion', {
     nombreEquipo: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    idUser: {
+        type: DataTypes.INTEGER,
+        references: { model: 'jugadores', key: 'idUser' }
+    },
+    idMatch: { 
+        type: DataTypes.INTEGER,
+        references: { model: 'partidos', key: 'idMatch' }
     }
 }, {
     tableName: 'participaciones',

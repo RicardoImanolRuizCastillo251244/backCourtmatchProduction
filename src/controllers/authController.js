@@ -1,4 +1,4 @@
-const { Jugador } = require('../models');
+const { Jugador } = require('../models/index');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'clave_segura';
 
 const login = async (req, res) => {
     try {
-        const { nombreUsuario, contraseña } = req.body;
+        const { nombreUsuario, contrasena } = req.body; 
 
         const jugador = await Jugador.findOne({ where: { nombreUsuario } });
 
@@ -14,7 +14,7 @@ const login = async (req, res) => {
             return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
         }
 
-        const esValida = await bcrypt.compare(contraseña, jugador.contraseña);
+        const esValida = await bcrypt.compare(contrasena, jugador.contrasena);
 
         if (!esValida) {
             return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
@@ -28,11 +28,12 @@ const login = async (req, res) => {
 
         res.json({
             mensaje: '¡Bienvenido a CourtMatch! ',
-            token: token
+            token: token,
+            idUser: jugador.idUser
         });
 
     } catch (error) {
-        console.error(error);
+        console.error('Error en login:', error);
         res.status(500).json({ error: 'Error en el servidor al iniciar sesión' });
     }
 };

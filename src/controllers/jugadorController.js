@@ -1,21 +1,32 @@
 const jugadorService = require('../services/jugadorService');
-const { Jugador, Partido, Deporte } = require('../models'); 
+const { Jugador, Partido, Deporte } = require('../models/index'); 
 
 const registrar = async (req, res) => {
     try {
-        const { nombreUsuario, correo, contraseña, ubicacion, idDeporteFavorito } = req.body;
+        const { nombreUsuario, correo, contrasena, ubicacion, idDeporteFavorito } = req.body;
 
-        if (!nombreUsuario || !correo || !contraseña || !ubicacion || !idDeporteFavorito) {
+        if (!nombreUsuario || !correo || !contrasena || !ubicacion || !idDeporteFavorito) {
             return res.status(400).json({ 
-                error: 'Faltan datos. Asegúrate de enviar nombreUsuario, correo, contraseña, ubicacion e idDeporteFavorito.' 
+                error: 'Faltan datos. Asegúrate de enviar nombreUsuario, correo, contrasena, ubicacion e idDeporteFavorito.' 
             });
         }
 
         const jugador = await jugadorService.crearJugador(req.body);
-        
+        const io = req.app.get('socketio');
+        if (io) {
+            io.emit('nuevoJugador', {
+                mensaje: `¡Bienvenido a CourtMatch, ${jugador.nombreUsuario}!`,
+                usuario: jugador.nombreUsuario
+            });
+        }
+    
         res.status(201).json({
             mensaje: 'Jugador creado con éxito',
-            jugador: jugador
+            jugador: {
+                idUser: jugador.idUser,
+                nombreUsuario: jugador.nombreUsuario,
+                correo: jugador.correo
+            }
         });
     } catch (error) {
         if (error.name === 'SequelizeUniqueConstraintError') {
@@ -24,6 +35,7 @@ const registrar = async (req, res) => {
         if (error.name === 'SequelizeForeignKeyConstraintError') {
             return res.status(400).json({ error: 'El deporte seleccionado no existe en la base de datos.' });
         }
+        console.error('Error al registrar:', error);
         res.status(400).json({ error: error.message });
     }
 };
@@ -31,6 +43,7 @@ const registrar = async (req, res) => {
 const obtenerJugadores = async (req, res) => {
     try {
         const jugadores = await Jugador.findAll({
+            attributes: { exclude: ['contrasena'] }, 
             include: [{
                 model: Deporte,
                 attributes: ['nombreDeporte'] 
@@ -38,8 +51,8 @@ const obtenerJugadores = async (req, res) => {
         }); 
         res.json(jugadores);
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Hubo un error al obtener los jugadores');
+        console.error('Error al obtener jugadores:', error);
+        res.status(500).json({ error: 'Hubo un error al obtener los jugadores' });
     }
 };
 
@@ -48,6 +61,7 @@ const obtenerMisPartidos = async (req, res) => {
         const { id } = req.params; 
 
         const jugador = await Jugador.findByPk(id, {
+            attributes: ['nombreUsuario'],
             include: [{
                 model: Partido,
                 through: { attributes: [] } 
@@ -64,13 +78,9 @@ const obtenerMisPartidos = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error('Error al obtener partidos:', error);
         res.status(500).json({ error: 'Error al obtener los partidos del jugador' });
     }
 };
 
-module.exports = { 
-    registrar, 
-    obtenerJugadores,
-    obtenerMisPartidos 
-};
+module.exports = { registrar, obtenerJugadores, obtenerMisPartidos };
