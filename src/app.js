@@ -14,6 +14,8 @@ const authRoutes = require('./routes/authRoutes');
 const deporteRoutes = require('./routes/deporteRoutes');
 const lugarRoutes = require('./routes/lugarRoutes');
 
+const { verificarToken } = require('./middlewares/authMiddleware');
+
 const app = express();
 const server = http.createServer(app); 
 
@@ -30,12 +32,13 @@ app.use(express.json());
 app.set('socketio', io);
 
 app.use('/api/status', statusRoutes);
-app.use('/api/jugadores', jugadorRoutes);
-app.use('/api/partidos', partidoRoutes);
-app.use('/api/participaciones', participacionRoutes); 
 app.use('/api/auth', authRoutes);
+app.use('/api/jugadores', jugadorRoutes);
+app.use('/api/participaciones', participacionRoutes); 
 app.use('/api/deportes', deporteRoutes);
 app.use('/api/lugares', lugarRoutes);
+
+app.use('/api/partidos', verificarToken, partidoRoutes);
 
 io.on('connection', (socket) => {
     console.log(' Nuevo jugador conectado:', socket.id);
