@@ -22,9 +22,13 @@ const Jugador = sequelize.define('Jugador', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    ubicacion: { 
-        type: DataTypes.ENUM('copoya', 'jobo', 'TuxtlaGTZ', 'Comitan', 'villacorzo'), 
-        allowNull: false
+    idUbicacion: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'lugares',
+            key: 'idLugar'
+        }
     },
     idDeporteFavorito: { 
         type: DataTypes.INTEGER,

@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const lugarController = require('../controllers/lugarController');
 
-router.post('/crear', lugarController.crearLugar);
 router.get('/listar', lugarController.obtenerLugares);
-router.get('/mis-lugares/:idUser', lugarController.obtenerMisLugares);
+router.get('/:idLugar', lugarController.obtenerLugarPorId);
 
 module.exports = router;

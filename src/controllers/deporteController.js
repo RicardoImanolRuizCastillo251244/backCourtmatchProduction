@@ -1,36 +1,17 @@
-const { Deporte } = require('../models/index');
-
-const crearDeporte = async (req, res) => {
-    try {
-        const { nombreDeporte } = req.body;
-
-        if (!nombreDeporte) {
-            return res.status(400).json({ error: 'El nombre del deporte es obligatorio' });
-        }
-
-        const nuevoDeporte = await Deporte.create({ nombreDeporte });
-        
-        res.status(201).json({
-            mensaje: '¡Deporte agregado con éxito!',
-            deporte: nuevoDeporte
-        });
-    } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
-            return res.status(400).json({ error: 'Este deporte ya existe en la base de datos.' });
-        }
-        console.error('Error en crearDeporte:', error);
-        res.status(500).json({ error: 'Error al crear el deporte' });
-    }
-};
+const deporteService = require('../services/deporteService');
 
 const obtenerDeportes = async (req, res) => {
-    try {
-        const deportes = await Deporte.findAll();
-        res.json(deportes);
-    } catch (error) {
-        console.error('Error en obtenerDeportes:', error);
-        res.status(500).json({ error: 'Error al obtener los deportes' });
-    }
+  try {
+    const deportes = await deporteService.obtenerDeportes();
+    res.json(deportes);
+  } catch (error) {
+    console.error('Error en obtenerDeportes:', error);
+    res.status(500).json({ error: 'Error al obtener los deportes' });
+  }
+};
+
+const crearDeporte = async (req, res) => {
+  res.status(405).json({ error: 'No se permite crear deportes. Estos datos son una colección predefinida.' });
 };
 
 module.exports = { crearDeporte, obtenerDeportes };

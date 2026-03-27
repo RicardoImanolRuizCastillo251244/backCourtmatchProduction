@@ -11,13 +11,10 @@ Jugador.belongsTo(Deporte, { foreignKey: 'idDeporteFavorito' });
 Deporte.hasMany(Partido, { foreignKey: 'idDeporte' });
 Partido.belongsTo(Deporte, { foreignKey: 'idDeporte' });
 
-Jugador.hasMany(Lugar, { foreignKey: 'idUser' });
-Lugar.belongsTo(Jugador, { foreignKey: 'idUser' });
+Lugar.hasMany(Jugador, { foreignKey: 'idUbicacion' });
+Jugador.belongsTo(Lugar, { foreignKey: 'idUbicacion' });
 
-Deporte.hasMany(Lugar, { foreignKey: 'idDeporte' });
-Lugar.belongsTo(Deporte, { foreignKey: 'idDeporte' });
-
-Jugador.belongsToMany(Partido, { through: Participacion, foreignKey: 'idUser',otherKey: 'idMatch' });
-Partido.belongsToMany(Jugador, { through: Participacion, foreignKey: 'idMatch',otherKey: 'idUser'} );
+Jugador.belongsToMany(Partido, { through: Participacion, foreignKey: 'idUser', otherKey: 'idMatch' });
+Partido.belongsToMany(Jugador, { through: Participacion, foreignKey: 'idMatch', otherKey: 'idUser' });
 
 module.exports = { sequelize, Jugador, Partido, Participacion, Deporte, Lugar };
