@@ -58,10 +58,12 @@ const registroJugadorSchema = Joi.object({
 
 // Validación de login
 const loginSchema = Joi.object({
-  nombreUsuario: Joi.string()
+  correo: Joi.string()
+    .email()
     .required()
     .messages({
-      'any.required': 'El nombre de usuario es obligatorio',
+      'string.email': 'Debes proporcionar un correo válido',
+      'any.required': 'El correo es obligatorio',
     }),
 
   contrasena: Joi.string()
