@@ -9,6 +9,9 @@ const apiRoutes = require('./routes/index');
 const logger = require('./utils/logger');
 
 const app = express();
+
+// Configurar trust proxy para Railway/proxies
+app.set('trust proxy', true);
 const server = http.createServer(app);
 
 // ===== SOCKET.IO =====
