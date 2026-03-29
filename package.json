@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production node src/index.js",
+    "start": "cross-env NODE_ENV=production npx sequelize-cli db:migrate --env production && node src/index.js",
     "dev": "cross-env NODE_ENV=development nodemon src/index.js"
   },
   "keywords": [],
@@ -29,6 +29,7 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.11",
+    "sequelize-cli": "^6.6.5"
   }
 }
