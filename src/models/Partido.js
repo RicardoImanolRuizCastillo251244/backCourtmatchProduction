@@ -15,12 +15,45 @@ const Partido = sequelize.define('Partido', {
             key: 'idDeporte'
         }
     },
-    fecha: { type: DataTypes.DATEONLY, allowNull: false },
-    hora: { type: DataTypes.TIME, allowNull: false },
-    lugar: { type: DataTypes.STRING, allowNull: false },
-    maxJugadores: { type: DataTypes.INTEGER, allowNull: false }
+    fecha: { 
+        type: DataTypes.DATEONLY, 
+        allowNull: false,
+        validate: {
+            isDate: true,
+            isFuture(value) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (new Date(value) < today) {
+                    throw new Error('La fecha no puede ser en el pasado');
+                }
+            }
+        }
+    },
+    hora: { 
+        type: DataTypes.TIME, 
+        allowNull: false,
+        validate: {
+            isTime: true
+        }
+    },
+    idLugar: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'lugares',
+            key: 'idLugar'
+        }
+    },
+    maxJugadores: { 
+        type: DataTypes.INTEGER, 
+        allowNull: false,
+        validate: {
+            min: 2,
+            max: 100
+        }
+    }
 }, { 
-    tableName: 'Partido', 
+    tableName: 'partidos',
     timestamps: false 
 });
 

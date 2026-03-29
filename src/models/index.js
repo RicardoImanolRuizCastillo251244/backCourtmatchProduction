@@ -14,6 +14,9 @@ Partido.belongsTo(Deporte, { foreignKey: 'idDeporte' });
 Lugar.hasMany(Jugador, { foreignKey: 'idUbicacion' });
 Jugador.belongsTo(Lugar, { foreignKey: 'idUbicacion' });
 
+Lugar.hasMany(Partido, { foreignKey: 'idLugar' });
+Partido.belongsTo(Lugar, { foreignKey: 'idLugar' });
+
 Jugador.belongsToMany(Partido, { through: Participacion, foreignKey: 'idUser', otherKey: 'idMatch' });
 Partido.belongsToMany(Jugador, { through: Participacion, foreignKey: 'idMatch', otherKey: 'idUser' });
 

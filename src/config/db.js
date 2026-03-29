@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize');
-require('dotenv').config();
+// require('dotenv').config(); // Ya se carga en index.js
 
 const isProduction = process.env.NODE_ENV === 'production';
 

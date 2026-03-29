@@ -1,68 +1,96 @@
 const jugadorService = require('../services/jugadorService');
+const logger = require('../utils/logger');
 
-const registrar = async (req, res) => {
+/**
+ * POST /api/jugadores/registro - Registrar nuevo jugador
+ */
+const registrar = async (req, res, next) => {
   try {
-    const { idUbicacion } = req.body;
-    if (!idUbicacion) {
-      return res.status(400).json({ error: 'idUbicacion es obligatorio' });
-    }
-
-    const jugador = await jugadorService.crearJugador(req.body);
+    const jugador = await jugadorService.crearJugador(req.validatedBody);
+    
     const io = req.app.get('socketio');
     if (io) {
       io.emit('nuevoJugador', {
-        mensaje: `¡Bienvenido a CourtMatch, ${jugador.nombreUsuario}!`,
-        usuario: jugador.nombreUsuario
+        message: `¡Bienvenido a CourtMatch, ${jugador.nombreUsuario}!`,
+        usuario: jugador.nombreUsuario,
+        timestamp: new Date(),
       });
     }
 
+    logger.info(`Nuevo jugador registrado: ${jugador.nombreUsuario}`);
+
     res.status(201).json({
-      mensaje: 'Jugador creado con éxito',
-      jugador: {
+      ok: true,
+      statusCode: 201,
+      message: 'Jugador creado exitosamente',
+      data: {
         idUser: jugador.idUser,
         nombreUsuario: jugador.nombreUsuario,
-        correo: jugador.correo
-      }
+        correo: jugador.correo,
+      },
     });
   } catch (error) {
-    if (error.name === 'SequelizeUniqueConstraintError') {
-      return res.status(400).json({ error: 'El usuario o el correo ya están registrados.' });
-    }
-    if (error.name === 'SequelizeForeignKeyConstraintError') {
-      return res.status(400).json({ error: 'El deporte seleccionado no existe en la base de datos.' });
-    }
-    const status = error.statusCode || 400;
-    console.error('Error al registrar:', error);
-    res.status(status).json({ error: error.message });
+    logger.error(`Error al registrar jugador: ${error.message}`);
+    next(error);
   }
 };
 
-const obtenerJugadores = async (req, res) => {
+/**
+ * GET /api/jugadores - Obtener todos los jugadores (con paginación)
+ */
+const obtenerJugadores = async (req, res, next) => {
   try {
-    const jugadores = await jugadorService.obtenerJugadores();
-    res.json(jugadores);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const jugadores = await jugadorService.obtenerJugadores(page, limit);
+
+    res.json({
+      ok: true,
+      statusCode: 200,
+      message: 'Jugadores obtenidos exitosamente',
+      data: jugadores.rows,
+      pagination: {
+        total: jugadores.count,
+        pages: Math.ceil(jugadores.count / limit),
+        currentPage: page,
+        pageSize: limit,
+      },
+    });
   } catch (error) {
-    console.error('Error al obtener jugadores:', error);
-    res.status(500).json({ error: 'Hubo un error al obtener los jugadores' });
+    logger.error(`Error al obtener jugadores: ${error.message}`);
+    next(error);
   }
 };
 
-const obtenerMisPartidos = async (req, res) => {
+/**
+ * GET /api/jugadores/:id/partidos - Obtener partidos de un jugador
+ */
+const obtenerMisPartidos = async (req, res, next) => {
   try {
     const { id } = req.params;
     const jugador = await jugadorService.obtenerMisPartidos(id);
 
     if (!jugador) {
-      return res.status(404).json({ error: 'Jugador no encontrado' });
+      return res.status(404).json({
+        ok: false,
+        statusCode: 404,
+        message: 'Jugador no encontrado',
+      });
     }
 
     res.json({
-      jugador: jugador.nombreUsuario,
-      misPartidos: jugador.Partidos
+      ok: true,
+      statusCode: 200,
+      message: 'Partidos obtenidos exitosamente',
+      data: {
+        jugador: jugador.nombreUsuario,
+        partidos: jugador.Partidos,
+      },
     });
   } catch (error) {
-    console.error('Error al obtener partidos:', error);
-    res.status(500).json({ error: 'Error al obtener los partidos del jugador' });
+    logger.error(`Error al obtener partidos del jugador: ${error.message}`);
+    next(error);
   }
 };
 

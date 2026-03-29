@@ -1,16 +1,54 @@
 const authService = require('../services/authService');
+const logger = require('../utils/logger');
 
-const login = async (req, res) => {
+/**
+ * Login - POST /api/auth/login
+ */
+const login = async (req, res, next) => {
   try {
-    const { nombreUsuario, contrasena } = req.body;
-    const data = await authService.login({ nombreUsuario, contrasena });
+    const { correo, contrasena } = req.body;
+    const data = await authService.login({ correo, contrasena });
 
-    res.json({ mensaje: '¡Bienvenido a CourtMatch!', token: data.token, idUser: data.idUser });
+    res.json({
+      ok: true,
+      statusCode: 200,
+      message: '¡Bienvenido a CourtMatch!',
+      data: {
+        token: data.token,
+        refreshToken: data.refreshToken,
+        idUser: data.idUser,
+        nombreUsuario: data.nombreUsuario,
+        correo: data.correo,
+        expiresIn: data.expiresIn,
+      },
+    });
   } catch (error) {
-    console.error('Error en login:', error);
-    const status = error.statusCode || 500;
-    res.status(status).json({ error: error.message });
+    logger.error(`Error en login: ${error.message}`);
+    next(error);
   }
 };
 
-module.exports = { login };
+/**
+ * Refresh Token - POST /api/auth/refresh
+ */
+const refreshToken = async (req, res, next) => {
+  try {
+    const { refreshToken: token } = req.body;
+    const data = await authService.refreshAccessToken(token);
+
+    res.json({
+      ok: true,
+      statusCode: 200,
+      message: 'Token refrescado exitosamente',
+      data: {
+        token: data.token,
+        expiresIn: data.expiresIn,
+      },
+    });
+  } catch (error) {
+    logger.error(`Error al refrescar token: ${error.message}`);
+    next(error);
+  }
+};
+
+module.exports = { login, refreshToken };
