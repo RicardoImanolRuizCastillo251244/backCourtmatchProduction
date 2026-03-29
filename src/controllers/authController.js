@@ -17,7 +17,6 @@ const login = async (req, res, next) => {
         token: data.token,
         refreshToken: data.refreshToken,
         idUser: data.idUser,
-        nombreUsuario: data.nombreUsuario,
         correo: data.correo,
         expiresIn: data.expiresIn,
       },

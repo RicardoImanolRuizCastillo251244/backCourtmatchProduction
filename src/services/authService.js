@@ -65,7 +65,6 @@ const login = async ({ correo, contrasena }) => {
     token,
     refreshToken,
     idUser: jugador.idUser,
-    nombreUsuario: jugador.nombreUsuario,
     correo: jugador.correo,
     expiresIn: JWT_EXPIRE_TIME,
   };
