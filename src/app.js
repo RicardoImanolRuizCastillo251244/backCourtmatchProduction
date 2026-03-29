@@ -10,8 +10,9 @@ const logger = require('./utils/logger');
 
 const app = express();
 
-// Configurar trust proxy para Railway/proxies
-app.set('trust proxy', true);
+// Configurar trust proxy para producción detrás de un proxy (Railway u otros)
+// Se recomienda un valor numérico como 1 en lugar de true para evitar advertencias de express-rate-limit.
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 
 // ===== SOCKET.IO =====

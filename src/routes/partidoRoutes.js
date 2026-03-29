@@ -10,8 +10,10 @@ const crearPartidoLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
   max: 20, // 20 partidos
   message: 'Demasiados partidos creados. Intenta de nuevo más tarde.',
-  keyGenerator: (req) => req.usuario.id,
-  validate: false,
+  keyGenerator: (req) => req.usuario?.id || req.ip,
+  standardHeaders: true,
+  legacyHeaders: false,
+  trustProxy: 1,
 });
 
 // POST /api/partidos/programar (requiere autenticación)
