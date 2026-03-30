@@ -31,10 +31,7 @@ const Partido = sequelize.define('Partido', {
     },
     hora: { 
         type: DataTypes.TIME, 
-        allowNull: false,
-        validate: {
-            isTime: true
-        }
+        allowNull: false
     },
     idLugar: {
         type: DataTypes.INTEGER,
