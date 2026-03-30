@@ -8,7 +8,9 @@ module.exports = {
       { nombre: 'Suchiapa' },
       { nombre: 'Jobo' },
       { nombre: 'Tuxtla' },
-    ], {});
+    ], {
+      ignoreDuplicates: true,
+    });
   },
 
   async down (queryInterface, Sequelize) {

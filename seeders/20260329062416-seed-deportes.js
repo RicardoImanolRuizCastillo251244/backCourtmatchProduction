@@ -8,7 +8,9 @@ module.exports = {
       { nombreDeporte: 'Basquetbol' },
       { nombreDeporte: 'Beisbol' },
       { nombreDeporte: 'Voleibol' },
-    ], {});
+    ], {
+      ignoreDuplicates: true,
+    });
   },
 
   async down (queryInterface, Sequelize) {
