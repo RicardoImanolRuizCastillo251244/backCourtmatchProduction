@@ -13,6 +13,15 @@ const login = async (req, res, next) => {
       ok: true,
       statusCode: 200,
       message: '¡Bienvenido a CourtMatch!',
+      session: {
+        token: data.token,
+        refreshToken: data.refreshToken,
+        user: {
+          idUser: data.idUser,
+          correo: data.correo,
+        },
+        expiresIn: data.expiresIn,
+      },
       data: {
         token: data.token,
         refreshToken: data.refreshToken,
