@@ -5,12 +5,13 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     try {
       // Agregar columnas a tabla partidos
+      // idCreador inicialmente nullable, seria seteado a notNull después de tener datos
       await queryInterface.addColumn(
         'partidos',
         'idCreador',
         {
           type: Sequelize.INTEGER,
-          allowNull: false,
+          allowNull: true, // Inicialmente nullable
           references: {
             model: 'jugadores',
             key: 'idUser'
