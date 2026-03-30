@@ -66,13 +66,6 @@ router.post(
   partidoController.unirsePartido
 );
 
-// DELETE /api/partidos/:idMatch/participantes/:idParticipante - Remover participante (solo creador)
-router.delete(
-  '/:idMatch/participantes/:idParticipante',
-  verificarToken,
-  partidoController.removerParticipante
-);
-
 // DELETE /api/partidos/:idMatch - Cancelar partido (solo creador)
 router.delete(
   '/:idMatch',

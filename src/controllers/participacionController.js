@@ -8,7 +8,7 @@ const unirseAPartido = async (req, res, next) => {
   try {
     const { idUser, idMatch, nombreEquipo } = req.validatedBody;
 
-    const { participacion, jugador, partido } = await participacionService.unirseAPartido({
+    const { participacion, jugador, partido, resumenCupos } = await participacionService.unirseAPartido({
       idUser,
       idMatch,
       nombreEquipo,
@@ -40,6 +40,9 @@ const unirseAPartido = async (req, res, next) => {
           lugar: partido.lugar,
           fecha: partido.fecha,
           hora: partido.hora,
+          maxJugadores: resumenCupos.maxJugadores,
+          participantesActuales: resumenCupos.participantesActuales,
+          cuposDisponibles: resumenCupos.cuposDisponibles,
         },
       },
     });
@@ -49,4 +52,47 @@ const unirseAPartido = async (req, res, next) => {
   }
 };
 
-module.exports = { unirseAPartido };
+/**
+ * GET /api/participaciones/:idMatch - Obtener participaciones y cupos de un partido
+ */
+const obtenerParticipacionesPorPartido = async (req, res, next) => {
+  try {
+    const idMatch = parseInt(req.params.idMatch, 10);
+    const resultado = await participacionService.obtenerParticipacionesPorPartido(idMatch);
+
+    res.json({
+      ok: true,
+      statusCode: 200,
+      message: 'Participaciones obtenidas exitosamente',
+      data: resultado,
+    });
+  } catch (error) {
+    logger.error(`Error al obtener participaciones del partido ${req.params.idMatch}: ${error.message}`);
+    next(error);
+  }
+};
+
+/**
+ * DELETE /api/participaciones/:idParticipacion - Cancelar asistencia propia
+ */
+const cancelarAsistencia = async (req, res, next) => {
+  try {
+    const idParticipacion = parseInt(req.params.idParticipacion, 10);
+    const idUsuario = req.usuario.id;
+
+    const resultado = await participacionService.cancelarAsistencia(idParticipacion, idUsuario);
+
+    logger.info(`Usuario ${idUsuario} canceló su asistencia (participación ${idParticipacion})`);
+
+    res.json({
+      ok: true,
+      statusCode: 200,
+      message: resultado.mensaje,
+    });
+  } catch (error) {
+    logger.error(`Error al cancelar asistencia ${req.params.idParticipacion}: ${error.message}`);
+    next(error);
+  }
+};
+
+module.exports = { unirseAPartido, obtenerParticipacionesPorPartido, cancelarAsistencia };

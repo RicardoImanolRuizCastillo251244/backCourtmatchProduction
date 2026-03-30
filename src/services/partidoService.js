@@ -1,5 +1,6 @@
 const { Partido, Deporte, Lugar, Participacion, Jugador, sequelize } = require('../models/index');
 const { ValidationError, NotFoundError, ConflictError } = require('../utils/errors');
+const participacionService = require('./participacionService');
 
 /**
  * Crear un nuevo partido con transacción
@@ -102,6 +103,14 @@ const obtenerPartidos = async (page = 1, limit = 10) => {
         attributes: ['idLugar', 'nombre']
       }
     ],
+    attributes: {
+      include: [
+        [
+          sequelize.literal('(SELECT COUNT(*) FROM participaciones WHERE participaciones.idMatch = Partido.idMatch)'),
+          'participantesActuales'
+        ]
+      ]
+    },
     where: { estado: ['programado', 'en_curso'] },
     limit,
     offset,
@@ -137,8 +146,11 @@ const obtenerPartidoPorId = async (idMatch) => {
     where: { idMatch },
   });
 
+  const partidoData = partido.toJSON();
+
   return {
-    ...partido.toJSON(),
+    ...partidoData,
+    nombre: `${partidoData.Deporte?.nombreDeporte ?? ''} - ${partidoData.Lugar?.nombre ?? ''}`,
     participantesActuales: participantes,
     cuposDisponibles: Math.max(0, partido.maxJugadores - participantes),
   };
@@ -193,99 +205,14 @@ const obtenerParticipantes = async (idMatch) => {
 };
 
 /**
- * Unirse a un partido
+ * Unirse a un partido — delega a participacionService (fuente única de verdad)
  */
 const unirsePartido = async (idMatch, idUsuario, equipo) => {
-  const transaction = await sequelize.transaction();
-
-  try {
-    const partido = await Partido.findByPk(idMatch);
-    if (!partido) {
-      throw new NotFoundError('Partido', idMatch);
-    }
-
-    // Validar que el partido esté disponible
-    if (partido.estado !== 'programado') {
-      throw new ValidationError(`No puedes unirte a un partido ${partido.estado}`);
-    }
-
-    // Validar que el usuario no esté ya registrado
-    const yaRegistrado = await Participacion.findOne({
-      where: { idMatch, idUser: idUsuario }
-    });
-    if (yaRegistrado) {
-      throw new ConflictError('Ya estás registrado en este partido');
-    }
-
-    // Validar cupos disponibles
-    const participantes = await Participacion.count({ where: { idMatch } });
-    if (participantes >= partido.maxJugadores) {
-      throw new ValidationError('No hay cupos disponibles en este partido');
-    }
-
-    // Validar que usuario existe
-    const usuario = await Jugador.findByPk(idUsuario);
-    if (!usuario) {
-      throw new NotFoundError('Jugador', idUsuario);
-    }
-
-    if (!['A', 'B'].includes(equipo)) {
-      throw new ValidationError('El equipo debe ser A o B', 'equipo');
-    }
-
-    // Crear participación
-    const participacion = await Participacion.create(
-      {
-        idUser: idUsuario,
-        idMatch,
-        nombreEquipo: equipo
-      },
-      { transaction }
-    );
-
-    await transaction.commit();
-    return participacion;
-  } catch (error) {
-    await transaction.rollback();
-    throw error;
-  }
-};
-
-/**
- * Remover participante de un partido (solo creador)
- */
-const removerParticipante = async (idMatch, idParticipante, idCreador) => {
-  const transaction = await sequelize.transaction();
-
-  try {
-    const partido = await Partido.findByPk(idMatch);
-    if (!partido) {
-      throw new NotFoundError('Partido', idMatch);
-    }
-
-    // Validar permisos
-    if (partido.idCreador !== idCreador) {
-      throw new ValidationError('Solo el creador puede remover participantes', 'permisos');
-    }
-
-    const participacion = await Participacion.findByPk(idParticipante);
-    if (!participacion) {
-      throw new NotFoundError('Participación', idParticipante);
-    }
-
-    // No permitir que se remueva al creador
-    if (participacion.idUser === idCreador) {
-      throw new ValidationError('El creador no puede abandonar su propio partido');
-    }
-
-    await participacion.destroy({ transaction });
-    await transaction.commit();
-
-    return { mensaje: 'Participante removido exitosamente' };
-  } catch (error) {
-    await transaction.rollback();
-    throw error;
-  }
+  return participacionService.unirseAPartido({
+    idUser: Number(idUsuario),
+    idMatch: Number(idMatch),
+    nombreEquipo: equipo
+  });
 };
 
 /**
@@ -460,7 +387,6 @@ module.exports = {
   obtenerCreador,
   obtenerParticipantes,
   unirsePartido,
-  removerParticipante,
   cancelarPartido,
   cambiarEstadoPartido,
   obtenerPartidosCreadosPor,

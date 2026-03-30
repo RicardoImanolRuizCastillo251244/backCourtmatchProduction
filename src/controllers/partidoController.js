@@ -137,7 +137,7 @@ const unirsePartido = async (req, res, next) => {
     const idUsuario = req.usuario.id;
     const { equipo } = req.validatedBody;
 
-    const participacion = await partidoService.unirsePartido(idMatch, idUsuario, equipo);
+    const { participacion, jugador, partido, resumenCupos } = await partidoService.unirsePartido(idMatch, idUsuario, equipo);
 
     const io = req.app.get('socketio');
     if (io) {
@@ -155,33 +155,24 @@ const unirsePartido = async (req, res, next) => {
       ok: true,
       statusCode: 201,
       message: '¡Te has unido al partido exitosamente!',
-      data: participacion,
+      data: {
+        participacion,
+        jugador: {
+          nombreUsuario: jugador.nombreUsuario,
+          correo: jugador.correo,
+        },
+        partido: {
+          lugar: partido.lugar,
+          fecha: partido.fecha,
+          hora: partido.hora,
+          maxJugadores: resumenCupos.maxJugadores,
+          participantesActuales: resumenCupos.participantesActuales,
+          cuposDisponibles: resumenCupos.cuposDisponibles,
+        },
+      },
     });
   } catch (error) {
     logger.error(`Error al unirse al partido ${req.params.idMatch}: ${error.message}`);
-    next(error);
-  }
-};
-
-/**
- * DELETE /api/partidos/:idMatch/participantes/:idParticipante - Remover participante (solo creador)
- */
-const removerParticipante = async (req, res, next) => {
-  try {
-    const { idMatch, idParticipante } = req.params;
-    const idCreador = req.usuario.id;
-
-    const resultado = await partidoService.removerParticipante(idMatch, idParticipante, idCreador);
-
-    logger.info(`Participante ${idParticipante} removido del partido ${idMatch} por ${idCreador}`);
-
-    res.json({
-      ok: true,
-      statusCode: 200,
-      message: resultado.mensaje,
-    });
-  } catch (error) {
-    logger.error(`Error al remover participante: ${error.message}`);
     next(error);
   }
 };
@@ -345,7 +336,6 @@ module.exports = {
   obtenerCreador,
   obtenerParticipantes,
   unirsePartido,
-  removerParticipante,
   cancelarPartido,
   cambiarEstado,
   obtenerPartidosCreadosPor,

@@ -15,4 +15,10 @@ const inscripcionLimiter = rateLimit({
 // POST /api/participaciones/inscribir (requiere auth)
 router.post('/inscribir', verificarToken, inscripcionLimiter, validate(inscripcionPartidoSchema), participacionController.unirseAPartido);
 
+// GET /api/participaciones/:idMatch - Obtener participaciones y cupos de un partido (requiere auth)
+router.get('/:idMatch', verificarToken, participacionController.obtenerParticipacionesPorPartido);
+
+// DELETE /api/participaciones/:idParticipacion - Cancelar propia asistencia (requiere auth)
+router.delete('/:idParticipacion', verificarToken, participacionController.cancelarAsistencia);
+
 module.exports = router;
