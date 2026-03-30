@@ -126,7 +126,7 @@ const crearPartidoSchema = Joi.object({
     }),
 });
 
-// Validación de inscripción a partido
+// Validación de inscripción a partido (DEPRECATED - use unirsePartidoSchema para nuevas rutas)
 const inscripcionPartidoSchema = Joi.object({
   idUser: Joi.number()
     .integer()
@@ -151,6 +151,44 @@ const inscripcionPartidoSchema = Joi.object({
     .allow(null, '')
     .messages({
       'string.max': 'El nombre del equipo no debe exceder 50 caracteres',
+    }),
+});
+
+// Validación para unirse a un partido (nueva)
+const unirsePartidoSchema = Joi.object({
+  nombreEquipo: Joi.string()
+    .max(50)
+    .allow(null, '')
+    .messages({
+      'string.max': 'El nombre del equipo no debe exceder 50 caracteres',
+    }),
+});
+
+// Validación para cancelar partido
+const cancelarPartidoSchema = Joi.object({
+  motivoCancelacion: Joi.string()
+    .max(500)
+    .required()
+    .messages({
+      'string.max': 'El motivo no debe exceder 500 caracteres',
+      'any.required': 'El motivo de cancelación es obligatorio',
+    }),
+});
+
+// Validación para cambiar estado de partido (admin)
+const cambiarEstadoPartidoSchema = Joi.object({
+  estado: Joi.string()
+    .valid('programado', 'en_curso', 'finalizado', 'cancelado')
+    .required()
+    .messages({
+      'any.only': 'El estado debe ser: programado, en_curso, finalizado o cancelado',
+      'any.required': 'El estado es obligatorio',
+    }),
+  motivoCancelacion: Joi.string()
+    .max(500)
+    .allow(null, '')
+    .messages({
+      'string.max': 'El motivo no debe exceder 500 caracteres',
     }),
 });
 
@@ -185,5 +223,8 @@ module.exports = {
   loginSchema,
   crearPartidoSchema,
   inscripcionPartidoSchema,
+  unirsePartidoSchema,
+  cancelarPartidoSchema,
+  cambiarEstadoPartidoSchema,
   validate,
 };

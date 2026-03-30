@@ -48,10 +48,27 @@ const Partido = sequelize.define('Partido', {
             min: 2,
             max: 100
         }
+    },
+    idCreador: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'jugadores',
+            key: 'idUser'
+        }
+    },
+    estado: {
+        type: DataTypes.ENUM('programado', 'en_curso', 'finalizado', 'cancelado'),
+        allowNull: false,
+        defaultValue: 'programado'
+    },
+    motivoCancelacion: {
+        type: DataTypes.STRING(500),
+        allowNull: true
     }
 }, { 
     tableName: 'partidos',
-    timestamps: false 
+    timestamps: true 
 });
 
 module.exports = Partido;
