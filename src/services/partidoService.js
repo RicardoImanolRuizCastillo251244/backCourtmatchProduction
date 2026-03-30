@@ -6,7 +6,7 @@ const { ValidationError, NotFoundError, ConflictError } = require('../utils/erro
  * El creador se agrega automáticamente como participante
  */
 const crearPartido = async (payload, idCreador) => {
-  const { idDeporte, fecha, hora, idLugar, maxJugadores } = payload;
+  const { idDeporte, fecha, hora, idLugar, maxJugadores, equipoCreador } = payload;
 
   // Validar datos obligatorios
   if (!idDeporte || !fecha || !hora || !idLugar || !maxJugadores) {
@@ -36,6 +36,10 @@ const crearPartido = async (payload, idCreador) => {
     throw new ValidationError('El máximo de jugadores debe estar entre 2 y 100', 'maxJugadores');
   }
 
+  if (!['A', 'B'].includes(equipoCreador)) {
+    throw new ValidationError('El equipo del creador debe ser A o B', 'equipoCreador');
+  }
+
   // Usar transacción para garantizar consistencia
   const transaction = await sequelize.transaction();
 
@@ -59,7 +63,7 @@ const crearPartido = async (payload, idCreador) => {
       {
         idUser: idCreador,
         idMatch: partido.idMatch,
-        nombreEquipo: null
+        nombreEquipo: equipoCreador
       },
       { transaction }
     );
@@ -191,7 +195,7 @@ const obtenerParticipantes = async (idMatch) => {
 /**
  * Unirse a un partido
  */
-const unirsePartido = async (idMatch, idUsuario, nombreEquipo = null) => {
+const unirsePartido = async (idMatch, idUsuario, equipo) => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -225,12 +229,16 @@ const unirsePartido = async (idMatch, idUsuario, nombreEquipo = null) => {
       throw new NotFoundError('Jugador', idUsuario);
     }
 
+    if (!['A', 'B'].includes(equipo)) {
+      throw new ValidationError('El equipo debe ser A o B', 'equipo');
+    }
+
     // Crear participación
     const participacion = await Participacion.create(
       {
         idUser: idUsuario,
         idMatch,
-        nombreEquipo
+        nombreEquipo: equipo
       },
       { transaction }
     );

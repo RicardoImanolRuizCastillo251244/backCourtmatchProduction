@@ -9,7 +9,10 @@ const Participacion = sequelize.define('Participacion', {
     },
     nombreEquipo: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: true,
+        validate: {
+            isIn: [['A', 'B']]
+        }
     },
     idUser: {
         type: DataTypes.INTEGER,

@@ -1,5 +1,11 @@
 const Joi = require('joi');
 
+const equipoSchema = Joi.string()
+  .valid('A', 'B')
+  .messages({
+    'any.only': 'El equipo debe ser A o B',
+  });
+
 /**
  * Esquemas de validación para la aplicación
  */
@@ -124,6 +130,12 @@ const crearPartidoSchema = Joi.object({
       'number.max': 'Máximo 100 jugadores',
       'any.required': 'Max jugadores es obligatorio',
     }),
+
+  equipoCreador: equipoSchema
+    .required()
+    .messages({
+      'any.required': 'El equipo del creador es obligatorio',
+    }),
 });
 
 // Validación de inscripción a partido (DEPRECATED - use unirsePartidoSchema para nuevas rutas)
@@ -156,11 +168,10 @@ const inscripcionPartidoSchema = Joi.object({
 
 // Validación para unirse a un partido (nueva)
 const unirsePartidoSchema = Joi.object({
-  nombreEquipo: Joi.string()
-    .max(50)
-    .allow(null, '')
+  equipo: equipoSchema
+    .required()
     .messages({
-      'string.max': 'El nombre del equipo no debe exceder 50 caracteres',
+      'any.required': 'El equipo es obligatorio',
     }),
 });
 

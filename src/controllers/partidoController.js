@@ -135,9 +135,9 @@ const unirsePartido = async (req, res, next) => {
   try {
     const { idMatch } = req.params;
     const idUsuario = req.usuario.id;
-    const { nombreEquipo } = req.validatedBody;
+    const { equipo } = req.validatedBody;
 
-    const participacion = await partidoService.unirsePartido(idMatch, idUsuario, nombreEquipo);
+    const participacion = await partidoService.unirsePartido(idMatch, idUsuario, equipo);
 
     const io = req.app.get('socketio');
     if (io) {
