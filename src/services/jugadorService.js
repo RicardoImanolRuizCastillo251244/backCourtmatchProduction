@@ -85,7 +85,7 @@ const obtenerMisPartidos = async (id) => {
       {
         model: Partido,
         through: { attributes: [] },
-        attributes: ['idMatch', 'idDeporte', 'fecha', 'hora', 'lugar', 'maxJugadores'],
+        attributes: ['idMatch', 'idDeporte', 'fecha', 'hora', 'idLugar', 'maxJugadores'],
       },
     ],
   });
