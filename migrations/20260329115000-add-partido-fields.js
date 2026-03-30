@@ -53,15 +53,32 @@ module.exports = {
         );
       }
 
-      // Agregar timestamps
+      // Agregar timestamps - SIN defaultValue para evitar errores de datetime inválido
       if (!table.createdAt) {
         await queryInterface.addColumn(
           'partidos',
           'createdAt',
           {
-            type: Sequelize.DATE,
+            type: Sequelize.DATE(3),
+            allowNull: true
+          },
+          { transaction }
+        );
+        
+        // Actualizar filas existentes con NOW()
+        await queryInterface.sequelize.query(
+          'UPDATE partidos SET createdAt = NOW() WHERE createdAt IS NULL',
+          { transaction }
+        );
+
+        // Cambiar a NOT NULL después de actualizar
+        await queryInterface.changeColumn(
+          'partidos',
+          'createdAt',
+          {
+            type: Sequelize.DATE(3),
             allowNull: false,
-            defaultValue: Sequelize.NOW
+            defaultValue: Sequelize.literal('CURRENT_TIMESTAMP(3)')
           },
           { transaction }
         );
@@ -72,9 +89,26 @@ module.exports = {
           'partidos',
           'updatedAt',
           {
-            type: Sequelize.DATE,
+            type: Sequelize.DATE(3),
+            allowNull: true
+          },
+          { transaction }
+        );
+
+        // Actualizar filas existentes con NOW()
+        await queryInterface.sequelize.query(
+          'UPDATE partidos SET updatedAt = NOW() WHERE updatedAt IS NULL',
+          { transaction }
+        );
+
+        // Cambiar a NOT NULL después de actualizar
+        await queryInterface.changeColumn(
+          'partidos',
+          'updatedAt',
+          {
+            type: Sequelize.DATE(3),
             allowNull: false,
-            defaultValue: Sequelize.NOW
+            defaultValue: Sequelize.literal('CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)')
           },
           { transaction }
         );
