@@ -37,14 +37,6 @@ const Jugador = sequelize.define('Jugador', {
             model: 'deportes',
             key: 'idDeporte'
         }
-    },
-    partidosGanados: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0
-    },
-    partidosJugados: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0
     }
 }, {
     tableName: 'jugadores',
