@@ -319,6 +319,7 @@ const obtenerPartidosParticipando = async (idUsuario, page = 1, limit = 10) => {
     where: { idUser: idUsuario },
     include: [
       {
+        as: 'Partido',
         model: Partido,
         include: [
           { model: Deporte, attributes: ['idDeporte', 'nombreDeporte'] },
