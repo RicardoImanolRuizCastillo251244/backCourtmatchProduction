@@ -34,8 +34,8 @@ const unirsePartidoLimiter = rateLimit({
 
 // ==================== PÚBLICOS ====================
 
-// GET /api/partidos - Obtener todos los partidos disponibles (requiere auth)
-router.get('/', verificarToken, partidoController.obtenerPartidos);
+// GET /api/partidos - Obtener todos los partidos disponibles (público)
+router.get('/', partidoController.obtenerPartidos);
 
 // GET /api/partidos/:idMatch - Obtener detalles de un partido específico
 router.get('/:idMatch', verificarToken, partidoController.obtenerPartidoPorId);
