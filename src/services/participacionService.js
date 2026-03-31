@@ -103,6 +103,7 @@ const obtenerParticipacionesPorPartido = async (idMatch) => {
     where: { idMatch },
     include: [
       {
+        as: 'Jugador',
         model: Jugador,
         attributes: ['idUser', 'nombreUsuario', 'correo'],
       },

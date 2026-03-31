@@ -222,7 +222,7 @@ const cancelarPartido = async (idMatch, idCreador, motivoCancelacion) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const partido = await Partido.findByPk(idMatch);
+    const partido = await Partido.findByPk(idMatch, { transaction });
     if (!partido) {
       throw new NotFoundError('Partido', idMatch);
     }
@@ -232,22 +232,26 @@ const cancelarPartido = async (idMatch, idCreador, motivoCancelacion) => {
       throw new ValidationError('Solo el creador puede cancelar el partido', 'permisos');
     }
 
-    // Validar estado
-    if (partido.estado !== 'programado') {
+    // Un partido en curso o finalizado no se elimina desde este endpoint.
+    // Si ya estaba marcado como cancelado por datos previos, se permite purgarlo.
+    if (['en_curso', 'finalizado'].includes(partido.estado)) {
       throw new ValidationError(`No se puede cancelar un partido en estado ${partido.estado}`);
     }
 
-    // Actualizar partido
-    await partido.update(
-      {
-        estado: 'cancelado',
-        motivoCancelacion
-      },
-      { transaction }
-    );
+    await Participacion.destroy({
+      where: { idMatch },
+      transaction,
+    });
+
+    await partido.destroy({ transaction });
 
     await transaction.commit();
-    return partido;
+
+    return {
+      idMatch: Number(idMatch),
+      eliminado: true,
+      motivoCancelacion,
+    };
   } catch (error) {
     await transaction.rollback();
     throw error;
