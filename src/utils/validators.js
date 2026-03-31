@@ -92,11 +92,21 @@ const crearPartidoSchema = Joi.object({
 
   fecha: Joi.date()
     .iso()
-    .min('now')
+    .custom((value, helpers) => {
+      const fecha = new Date(value);
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      fecha.setHours(0, 0, 0, 0);
+
+      if (fecha < hoy) {
+        return helpers.message('La fecha no puede ser en el pasado');
+      }
+
+      return value;
+    })
     .required()
     .messages({
       'date.base': 'La fecha debe ser válida (formato ISO)',
-      'date.min': 'La fecha no puede ser en el pasado',
       'any.required': 'La fecha es obligatoria',
     }),
 

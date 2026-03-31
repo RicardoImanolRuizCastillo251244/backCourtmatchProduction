@@ -41,6 +41,32 @@ const crearPartido = async (payload, idCreador) => {
     throw new ValidationError('El equipo del creador debe ser A o B', 'equipoCreador');
   }
 
+  const ahora = new Date();
+  const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+  const fechaPartido = new Date(`${fecha}T00:00:00`);
+
+  if (Number.isNaN(fechaPartido.getTime()) || fechaPartido < hoy) {
+    throw new ValidationError('La fecha no puede ser en el pasado', 'fecha');
+  }
+
+  // Si la fecha es hoy, la hora del partido no puede ser anterior a la hora actual.
+  if (fechaPartido.getTime() === hoy.getTime()) {
+    const [horas, minutos] = String(hora).split(':').map(Number);
+    const fechaHoraPartido = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      ahora.getDate(),
+      horas,
+      minutos,
+      0,
+      0
+    );
+
+    if (fechaHoraPartido < ahora) {
+      throw new ValidationError('La hora no puede ser en el pasado para la fecha actual', 'hora');
+    }
+  }
+
   // Usar transacción para garantizar consistencia
   const transaction = await sequelize.transaction();
 
