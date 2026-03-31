@@ -90,19 +90,24 @@ const crearPartidoSchema = Joi.object({
       'any.required': 'El deporte es obligatorio',
     }),
 
-  fecha: Joi.date()
-    .iso()
+  fecha: Joi.string()
+    .pattern(/^\d{4}-\d{2}-\d{2}$/)
     .custom((value, helpers) => {
-      const fechaRaw = typeof value === 'string' ? value : value.toISOString().slice(0, 10);
-      const [anio, mes, dia] = fechaRaw.split('-').map(Number);
+      const [anio, mes, dia] = value.split('-').map(Number);
       const fecha = new Date(anio, mes - 1, dia);
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
+
+      if (Number.isNaN(fecha.getTime())) {
+        return helpers.message('La fecha debe ser válida (formato YYYY-MM-DD)');
+      }
 
       if (fecha < hoy) {
         return helpers.message('La fecha no puede ser en el pasado');
       }
 
+      // Retornar siempre como string "YYYY-MM-DD" para que el servicio
+      // reciba un tipo predecible sin coerción de timezone por Date.
       return value;
     })
     .required()
