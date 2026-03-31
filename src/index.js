@@ -1,8 +1,9 @@
 require('dotenv').config();
-const { server } = require('./app');
+const { server, io } = require('./app');
 const sequelize = require('./config/db');
 const logger = require('./utils/logger');
 require('./models/index');
+const { iniciarScheduler } = require('./services/schedulerService');
 
 const PORT = process.env.PORT || 3000;
 
@@ -29,6 +30,11 @@ async function startServer() {
     server.listen(PORT, () => {
       logger.info(`Servidor corriendo en puerto: ${PORT}`);
       logger.info(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
+
+      // Iniciar scheduler de transiciones de partidos
+      // Se arranca dentro del callback de listen para garantizar que Socket.IO
+      // ya está completamente inicializado antes del primer tick.
+      iniciarScheduler(io);
     });
   } catch (error) {
     logger.error(`Error fatal al iniciar el servidor: ${error.message}`);
