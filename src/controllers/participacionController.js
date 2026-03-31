@@ -16,12 +16,16 @@ const unirseAPartido = async (req, res, next) => {
 
     const io = req.app.get('socketio');
     if (io) {
-      io.emit('jugadorUnido', {
+      const payload = {
         mensaje: `¡${jugador.nombreUsuario} se ha unido a la reta!`,
         lugar: partido.lugar,
         idMatch: idMatch,
         timestamp: new Date(),
-      });
+      };
+
+      // Emitir preferentemente a la sala del partido y emitir un fallback global resumen
+      io.to(`partido_${idMatch}`).emit('jugadorUnido', payload);
+      io.emit('partidosEstadoActualizado', { idsMatch: [idMatch], timestamp: new Date() });
     }
 
     logger.info(`Jugador ${jugador.nombreUsuario} inscrito en partido ${idMatch}`);

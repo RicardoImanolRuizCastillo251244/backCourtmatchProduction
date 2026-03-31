@@ -12,18 +12,18 @@ const crearPartido = async (req, res, next) => {
     
     const io = req.app.get('socketio');
     if (io) {
-      io.emit('nuevaReta', {
-        mensaje: '¡Nueva reta programada!',
-        detalles: {
-          idMatch: nuevoPartido.idMatch,
-          idLugar: nuevoPartido.idLugar,
-          fecha: nuevoPartido.fecha,
-          hora: nuevoPartido.hora,
-          deporte: nuevoPartido.idDeporte,
-          creador: nuevoPartido.creador.nombreUsuario
-        },
-        timestamp: new Date(),
-      });
+      const detalles = {
+        idMatch: nuevoPartido.idMatch,
+        idLugar: nuevoPartido.idLugar,
+        fecha: nuevoPartido.fecha,
+        hora: nuevoPartido.hora,
+        deporte: nuevoPartido.idDeporte,
+        creador: nuevoPartido.creador?.nombreUsuario,
+      };
+
+      // Nueva reta: emitir resumen público (DTO) para vistas generales
+      io.emit('nuevaReta', { mensaje: '¡Nueva reta programada!', detalles, timestamp: new Date() });
+      io.emit('partidosEstadoActualizado', { idsMatch: [nuevoPartido.idMatch], timestamp: new Date() });
     }
 
     logger.info(`Nuevo partido creado: ${nuevoPartido.idMatch} por usuario ${idCreador}`);
@@ -141,12 +141,16 @@ const unirsePartido = async (req, res, next) => {
 
     const io = req.app.get('socketio');
     if (io) {
-      io.emit('nuevoParticipante', {
+      const payload = {
         idMatch,
         idUsuario,
         mensaje: '¡Nuevo participante en el partido!',
         timestamp: new Date(),
-      });
+      };
+
+      // Emitir al room del partido y emitir resumen global
+      io.to(`partido_${idMatch}`).emit('nuevoParticipante', payload);
+      io.emit('partidosEstadoActualizado', { idsMatch: [idMatch], timestamp: new Date() });
     }
 
     logger.info(`Usuario ${idUsuario} se unió al partido ${idMatch}`);
@@ -190,11 +194,9 @@ const cancelarPartido = async (req, res, next) => {
 
     const io = req.app.get('socketio');
     if (io) {
-      io.emit('partidoCancelado', {
-        idMatch,
-        motivo: motivoCancelacion,
-        timestamp: new Date(),
-      });
+      const payload = { idMatch, motivo: motivoCancelacion, timestamp: new Date() };
+      io.to(`partido_${idMatch}`).emit('partidoCancelado', payload);
+      io.emit('partidosEstadoActualizado', { idsMatch: [idMatch], estado: 'cancelado', timestamp: new Date() });
     }
 
     logger.info(`Partido ${idMatch} cancelado por usuario ${idCreador}`);

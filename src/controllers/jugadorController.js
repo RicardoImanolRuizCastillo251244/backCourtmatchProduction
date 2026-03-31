@@ -10,8 +10,9 @@ const registrar = async (req, res, next) => {
     
     const io = req.app.get('socketio');
     if (io) {
+      // Emitir solo campos públicos y necesarios
       io.emit('nuevoJugador', {
-        message: `¡Bienvenido a CourtMatch, ${jugador.nombreUsuario}!`,
+        mensaje: `¡Bienvenido a CourtMatch, ${jugador.nombreUsuario}!`,
         usuario: jugador.nombreUsuario,
         timestamp: new Date(),
       });
