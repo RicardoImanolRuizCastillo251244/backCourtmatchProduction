@@ -23,7 +23,11 @@ const Partido = sequelize.define('Partido', {
             isFuture(value) {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                if (new Date(value) < today) {
+
+                const [anio, mes, dia] = String(value).split('-').map(Number);
+                const fecha = new Date(anio, mes - 1, dia);
+
+                if (fecha < today) {
                     throw new Error('La fecha no puede ser en el pasado');
                 }
             }

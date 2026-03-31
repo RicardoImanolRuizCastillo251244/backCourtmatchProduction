@@ -93,10 +93,11 @@ const crearPartidoSchema = Joi.object({
   fecha: Joi.date()
     .iso()
     .custom((value, helpers) => {
-      const fecha = new Date(value);
+      const fechaRaw = typeof value === 'string' ? value : value.toISOString().slice(0, 10);
+      const [anio, mes, dia] = fechaRaw.split('-').map(Number);
+      const fecha = new Date(anio, mes - 1, dia);
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
-      fecha.setHours(0, 0, 0, 0);
 
       if (fecha < hoy) {
         return helpers.message('La fecha no puede ser en el pasado');
