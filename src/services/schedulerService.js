@@ -72,6 +72,13 @@ async function procesarInicios(io) {
       mensaje: 'El partido ha comenzado',
     });
   });
+
+  // Fallback global para vistas de listado que no estén suscritas a sala específica.
+  io.emit('partidosEstadoActualizado', {
+    idsMatch: ids,
+    estado: 'en_curso',
+    timestamp: new Date(),
+  });
 }
 
 /**
@@ -111,6 +118,13 @@ async function procesarFinalizaciones(io) {
       estado: 'finalizado',
       mensaje: 'El partido ha finalizado',
     });
+  });
+
+  // Fallback global para vistas de listado que no estén suscritas a sala específica.
+  io.emit('partidosEstadoActualizado', {
+    idsMatch: ids,
+    estado: 'finalizado',
+    timestamp: new Date(),
   });
 }
 

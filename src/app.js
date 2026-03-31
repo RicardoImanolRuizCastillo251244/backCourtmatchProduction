@@ -131,6 +131,46 @@ io.on('connection', (socket) => {
     logger.warn(`Cliente sin autenticar conectado: ${socket.id}`);
   }
 
+  // Unirse a sala de un partido para recibir eventos específicos de estado.
+  socket.on('joinPartido', (payload = {}, ack) => {
+    const idMatch = Number(payload.idMatch);
+
+    if (!Number.isInteger(idMatch) || idMatch <= 0) {
+      if (typeof ack === 'function') {
+        ack({ ok: false, message: 'idMatch inválido' });
+      }
+      return;
+    }
+
+    const room = `partido_${idMatch}`;
+    socket.join(room);
+    logger.info(`Socket ${socket.id} unido a sala ${room}`);
+
+    if (typeof ack === 'function') {
+      ack({ ok: true, room });
+    }
+  });
+
+  // Salir de sala de partido cuando ya no se visualiza su detalle.
+  socket.on('leavePartido', (payload = {}, ack) => {
+    const idMatch = Number(payload.idMatch);
+
+    if (!Number.isInteger(idMatch) || idMatch <= 0) {
+      if (typeof ack === 'function') {
+        ack({ ok: false, message: 'idMatch inválido' });
+      }
+      return;
+    }
+
+    const room = `partido_${idMatch}`;
+    socket.leave(room);
+    logger.info(`Socket ${socket.id} salió de sala ${room}`);
+
+    if (typeof ack === 'function') {
+      ack({ ok: true, room });
+    }
+  });
+
   socket.on('disconnect', () => {
     if (socket.isAuthenticated) {
       logger.info(`Usuario ${socket.usuario} desconectado`);
