@@ -116,8 +116,28 @@ const crearPartido = async (payload, idCreador) => {
 /**
  * Obtener todos los partidos con paginación
  */
-const obtenerPartidos = async (page = 1, limit = 10) => {
+const obtenerPartidos = async (page = 1, limit = 10, estado) => {
   const offset = (page - 1) * limit;
+
+  const estadosValidos = ['programado', 'en_curso', 'finalizado', 'cancelado'];
+  const where = {};
+
+  if (typeof estado === 'string' && estado.trim().length > 0) {
+    const estadoNormalizado = estado.trim().toLowerCase();
+
+    if (estadoNormalizado === 'activos') {
+      where.estado = ['programado', 'en_curso'];
+    } else if (estadoNormalizado === 'todos') {
+      // Sin filtro de estado para incluir todos los registros.
+    } else if (estadosValidos.includes(estadoNormalizado)) {
+      where.estado = estadoNormalizado;
+    } else {
+      throw new ValidationError('El parámetro estado es inválido. Usa: activos, todos, programado, en_curso, finalizado o cancelado', 'estado');
+    }
+  } else {
+    // Por defecto se incluyen los finalizados para historial y consultas administrativas.
+    where.estado = ['programado', 'en_curso', 'finalizado'];
+  }
 
   const partidos = await Partido.findAndCountAll({
     include: [
@@ -138,7 +158,7 @@ const obtenerPartidos = async (page = 1, limit = 10) => {
         ]
       ]
     },
-    where: { estado: ['programado', 'en_curso'] },
+    where,
     limit,
     offset,
     order: [['fecha', 'ASC'], ['hora', 'ASC']],

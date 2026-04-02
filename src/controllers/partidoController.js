@@ -48,8 +48,9 @@ const obtenerPartidos = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const estado = req.query.estado;
 
-    const partidos = await partidoService.obtenerPartidos(page, limit);
+    const partidos = await partidoService.obtenerPartidos(page, limit, estado);
 
     res.json({
       ok: true,
