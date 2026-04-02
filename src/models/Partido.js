@@ -66,6 +66,10 @@ const Partido = sequelize.define('Partido', {
         allowNull: false,
         defaultValue: 'programado'
     },
+    descripcion: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
     motivoCancelacion: {
         type: DataTypes.STRING(500),
         allowNull: true

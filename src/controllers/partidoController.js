@@ -19,6 +19,7 @@ const crearPartido = async (req, res, next) => {
         hora: nuevoPartido.hora,
         deporte: nuevoPartido.idDeporte,
         creador: nuevoPartido.creador?.nombreUsuario,
+        descripcion: nuevoPartido.descripcion ?? null,
       };
 
       // Nueva reta: emitir resumen público (DTO) para vistas generales

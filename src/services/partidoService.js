@@ -7,7 +7,7 @@ const participacionService = require('./participacionService');
  * El creador se agrega automáticamente como participante
  */
 const crearPartido = async (payload, idCreador) => {
-  const { idDeporte, fecha, hora, idLugar, maxJugadores, equipoCreador } = payload;
+  const { idDeporte, fecha, hora, idLugar, maxJugadores, equipoCreador, descripcion } = payload;
 
   // Validar datos obligatorios
   if (!idDeporte || !fecha || !hora || !idLugar || !maxJugadores) {
@@ -80,6 +80,7 @@ const crearPartido = async (payload, idCreador) => {
         idLugar, 
         maxJugadores,
         idCreador,
+        descripcion: descripcion ?? null,
         estado: 'programado'
       },
       { transaction }

@@ -147,6 +147,13 @@ const crearPartidoSchema = Joi.object({
       'any.required': 'Max jugadores es obligatorio',
     }),
 
+  descripcion: Joi.string()
+    .max(1000)
+    .allow(null, '')
+    .messages({
+      'string.max': 'La descripción no debe exceder 1000 caracteres',
+    }),
+
   equipoCreador: equipoSchema
     .required()
     .messages({
