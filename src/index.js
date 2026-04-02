@@ -1,7 +1,9 @@
 require('dotenv').config();
 const { server } = require('./app');
+const { io } = require('./app');
 const sequelize = require('./config/db');
 const logger = require('./utils/logger');
+const { iniciarScheduler } = require('./services/schedulerService');
 require('./models/index');
 
 const PORT = process.env.PORT || 3000;
@@ -72,6 +74,9 @@ async function startServer() {
     server.listen(PORT, () => {
       logger.info(`Servidor corriendo en puerto: ${PORT}`);
       logger.info(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
+
+      // Iniciar transiciones automáticas de estado de partidos.
+      iniciarScheduler(io);
     });
   } catch (error) {
     logger.error(`Error fatal al iniciar el servidor: ${error.message}`);
