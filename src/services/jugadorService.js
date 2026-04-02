@@ -1,5 +1,6 @@
 const { Jugador, Deporte, Partido, Lugar } = require('../models/index');
 const { ValidationError, ConflictError, NotFoundError } = require('../utils/errors');
+const bcrypt = require('bcryptjs');
 
 /**
  * Crear un nuevo jugador
@@ -93,4 +94,71 @@ const obtenerMisPartidos = async (id) => {
   return jugador;
 };
 
-module.exports = { crearJugador, obtenerJugadores, obtenerMisPartidos };
+/**
+ * Actualizar nombre de perfil del usuario autenticado
+ */
+const actualizarPerfil = async (idUsuario, payload) => {
+  const { nombreUsuario } = payload;
+
+  const jugador = await Jugador.findByPk(idUsuario);
+  if (!jugador) {
+    throw new NotFoundError('Jugador', idUsuario);
+  }
+
+  if (jugador.nombreUsuario === nombreUsuario) {
+    throw new ValidationError('El nuevo nombre de usuario debe ser diferente al actual', 'nombreUsuario');
+  }
+
+  const usuarioExistente = await Jugador.findOne({ where: { nombreUsuario } });
+  if (usuarioExistente && usuarioExistente.idUser !== jugador.idUser) {
+    throw new ConflictError('El nombre de usuario ya está registrado.', 'nombreUsuario');
+  }
+
+  await jugador.update({ nombreUsuario });
+
+  return {
+    idUser: jugador.idUser,
+    nombreUsuario: jugador.nombreUsuario,
+    correo: jugador.correo,
+  };
+};
+
+/**
+ * Cambio seguro de contraseña (requiere contraseña actual)
+ */
+const cambiarContrasena = async (idUsuario, payload) => {
+  const { contrasenaActual, contrasenaNueva } = payload;
+
+  const jugador = await Jugador.findByPk(idUsuario);
+  if (!jugador) {
+    throw new NotFoundError('Jugador', idUsuario);
+  }
+
+  const passwordValida = await bcrypt.compare(contrasenaActual, jugador.contrasena);
+  if (!passwordValida) {
+    throw new ValidationError('La contraseña actual es incorrecta', 'contrasenaActual');
+  }
+
+  const coincideConActual = await bcrypt.compare(contrasenaNueva, jugador.contrasena);
+  if (coincideConActual) {
+    throw new ValidationError('La nueva contraseña debe ser diferente a la actual', 'contrasenaNueva');
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(contrasenaNueva, salt);
+
+  await jugador.update({ contrasena: hash });
+
+  return {
+    idUser: jugador.idUser,
+    actualizado: true,
+  };
+};
+
+module.exports = {
+  crearJugador,
+  obtenerJugadores,
+  obtenerMisPartidos,
+  actualizarPerfil,
+  cambiarContrasena,
+};

@@ -213,6 +213,44 @@ const cambiarEstadoPartidoSchema = Joi.object({
   // motivoCancelacion removed — not required or stored anymore
 });
 
+// Validación para actualizar nombre de perfil
+const actualizarPerfilSchema = Joi.object({
+  nombreUsuario: Joi.string()
+    .alphanum()
+    .min(3)
+    .max(30)
+    .required()
+    .messages({
+      'string.alphanum': 'El nombre debe contener solo letras y números',
+      'string.min': 'El nombre debe tener al menos 3 caracteres',
+      'string.max': 'El nombre no debe exceder 30 caracteres',
+      'any.required': 'El nombre de usuario es obligatorio',
+    }),
+});
+
+// Validación para cambio seguro de contraseña
+const cambiarContrasenaSchema = Joi.object({
+  contrasenaActual: Joi.string()
+    .min(8)
+    .required()
+    .messages({
+      'string.min': 'La contraseña actual debe tener al menos 8 caracteres',
+      'any.required': 'La contraseña actual es obligatoria',
+    }),
+
+  contrasenaNueva: Joi.string()
+    .min(8)
+    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]'))
+    .required()
+    .invalid(Joi.ref('contrasenaActual'))
+    .messages({
+      'string.min': 'La nueva contraseña debe tener al menos 8 caracteres',
+      'string.pattern.base': 'La nueva contraseña debe contener mayúscula, minúscula, número y carácter especial',
+      'any.invalid': 'La nueva contraseña debe ser diferente a la contraseña actual',
+      'any.required': 'La nueva contraseña es obligatoria',
+    }),
+});
+
 // Función auxiliar para validar
 const validate = (schema) => {
   return (req, res, next) => {
@@ -247,5 +285,7 @@ module.exports = {
   unirsePartidoSchema,
   cancelarPartidoSchema,
   cambiarEstadoPartidoSchema,
+  actualizarPerfilSchema,
+  cambiarContrasenaSchema,
   validate,
 };

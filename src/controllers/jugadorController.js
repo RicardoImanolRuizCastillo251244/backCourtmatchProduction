@@ -95,4 +95,53 @@ const obtenerMisPartidos = async (req, res, next) => {
   }
 };
 
-module.exports = { registrar, obtenerJugadores, obtenerMisPartidos };
+/**
+ * PATCH /api/jugadores/perfil - Actualizar nombre de perfil del usuario autenticado
+ */
+const actualizarPerfil = async (req, res, next) => {
+  try {
+    const idUsuario = req.usuario.id;
+    const perfil = await jugadorService.actualizarPerfil(idUsuario, req.validatedBody);
+
+    logger.info(`Perfil actualizado para usuario ${idUsuario}`);
+
+    res.json({
+      ok: true,
+      statusCode: 200,
+      message: 'Perfil actualizado exitosamente',
+      data: perfil,
+    });
+  } catch (error) {
+    logger.error(`Error al actualizar perfil: ${error.message}`);
+    next(error);
+  }
+};
+
+/**
+ * PATCH /api/jugadores/contrasena - Cambiar contraseña del usuario autenticado
+ */
+const cambiarContrasena = async (req, res, next) => {
+  try {
+    const idUsuario = req.usuario.id;
+    await jugadorService.cambiarContrasena(idUsuario, req.validatedBody);
+
+    logger.info(`Contraseña actualizada para usuario ${idUsuario}`);
+
+    res.json({
+      ok: true,
+      statusCode: 200,
+      message: 'Contraseña actualizada exitosamente',
+    });
+  } catch (error) {
+    logger.error(`Error al cambiar contraseña: ${error.message}`);
+    next(error);
+  }
+};
+
+module.exports = {
+  registrar,
+  obtenerJugadores,
+  obtenerMisPartidos,
+  actualizarPerfil,
+  cambiarContrasena,
+};
