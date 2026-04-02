@@ -70,10 +70,7 @@ const Partido = sequelize.define('Partido', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
-    motivoCancelacion: {
-        type: DataTypes.STRING(500),
-        allowNull: true
-    }
+    // motivoCancelacion removed — not used anymore
 }, { 
     tableName: 'partidos',
     timestamps: true 

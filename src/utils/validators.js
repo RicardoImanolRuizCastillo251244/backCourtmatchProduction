@@ -199,15 +199,7 @@ const unirsePartidoSchema = Joi.object({
 });
 
 // Validación para cancelar partido
-const cancelarPartidoSchema = Joi.object({
-  motivoCancelacion: Joi.string()
-    .max(500)
-    .required()
-    .messages({
-      'string.max': 'El motivo no debe exceder 500 caracteres',
-      'any.required': 'El motivo de cancelación es obligatorio',
-    }),
-});
+const cancelarPartidoSchema = Joi.object({});
 
 // Validación para cambiar estado de partido (admin)
 const cambiarEstadoPartidoSchema = Joi.object({
@@ -218,12 +210,7 @@ const cambiarEstadoPartidoSchema = Joi.object({
       'any.only': 'El estado debe ser: programado, en_curso, finalizado o cancelado',
       'any.required': 'El estado es obligatorio',
     }),
-  motivoCancelacion: Joi.string()
-    .max(500)
-    .allow(null, '')
-    .messages({
-      'string.max': 'El motivo no debe exceder 500 caracteres',
-    }),
+  // motivoCancelacion removed — not required or stored anymore
 });
 
 // Función auxiliar para validar

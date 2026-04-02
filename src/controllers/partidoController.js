@@ -189,13 +189,12 @@ const cancelarPartido = async (req, res, next) => {
   try {
     const { idMatch } = req.params;
     const idCreador = req.usuario.id;
-    const { motivoCancelacion } = req.validatedBody;
 
-    const partido = await partidoService.cancelarPartido(idMatch, idCreador, motivoCancelacion);
+    const partido = await partidoService.cancelarPartido(idMatch, idCreador);
 
     const io = req.app.get('socketio');
     if (io) {
-      const payload = { idMatch, motivo: motivoCancelacion, timestamp: new Date() };
+      const payload = { idMatch, timestamp: new Date() };
       io.to(`partido_${idMatch}`).emit('partidoCancelado', payload);
       io.emit('partidosEstadoActualizado', { idsMatch: [idMatch], estado: 'cancelado', timestamp: new Date() });
     }
@@ -222,14 +221,13 @@ const cambiarEstado = async (req, res, next) => {
     const { idMatch } = req.params;
     const idUsuario = req.usuario.id;
     const esAdmin = req.usuario.esAdmin || false;
-    const { estado, motivoCancelacion } = req.validatedBody;
+    const { estado } = req.validatedBody;
 
     const partido = await partidoService.cambiarEstadoPartido(
       idMatch,
       estado,
       idUsuario,
-      esAdmin,
-      motivoCancelacion
+      esAdmin
     );
 
     logger.info(`Estado del partido ${idMatch} cambiado a ${estado} por usuario ${idUsuario}`);

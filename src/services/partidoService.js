@@ -245,7 +245,7 @@ const unirsePartido = async (idMatch, idUsuario, equipo) => {
 /**
  * Cancelar un partido (solo creador)
  */
-const cancelarPartido = async (idMatch, idCreador, motivoCancelacion) => {
+const cancelarPartido = async (idMatch, idCreador) => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -277,7 +277,6 @@ const cancelarPartido = async (idMatch, idCreador, motivoCancelacion) => {
     return {
       idMatch: Number(idMatch),
       eliminado: true,
-      motivoCancelacion,
     };
   } catch (error) {
     await transaction.rollback();
@@ -288,7 +287,7 @@ const cancelarPartido = async (idMatch, idCreador, motivoCancelacion) => {
 /**
  * Cambiar estado de un partido (admin/creador)
  */
-const cambiarEstadoPartido = async (idMatch, estado, idUsuario, esAdmin = false, motivo = null) => {
+const cambiarEstadoPartido = async (idMatch, estado, idUsuario, esAdmin = false) => {
   const transaction = await sequelize.transaction();
 
   try {
@@ -302,12 +301,10 @@ const cambiarEstadoPartido = async (idMatch, estado, idUsuario, esAdmin = false,
       throw new ValidationError('Solo el creador o admin pueden cambiar el estado', 'permisos');
     }
 
-    // Actualizar
-    const motivoCancelacion = estado === 'cancelado' ? motivo : null;
+    // Actualizar estado solamente; motivoCancelacion ya no se persiste
     await partido.update(
       {
-        estado,
-        motivoCancelacion
+        estado
       },
       { transaction }
     );
