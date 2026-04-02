@@ -42,27 +42,19 @@ const crearPartido = async (req, res, next) => {
 };
 
 /**
- * GET /api/partidos - Obtener todos los partidos disponibles (requiere auth, con paginación)
+ * GET /api/partidos - Obtener todos los partidos disponibles (sin paginación)
  */
 const obtenerPartidos = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
     const estado = req.query.estado;
 
-    const partidos = await partidoService.obtenerPartidos(page, limit, estado);
+    const partidos = await partidoService.obtenerPartidos(estado);
 
     res.json({
       ok: true,
       statusCode: 200,
       message: 'Partidos obtenidos exitosamente',
-      data: partidos.rows,
-      pagination: {
-        total: partidos.count,
-        pages: Math.ceil(partidos.count / limit),
-        currentPage: page,
-        pageSize: limit,
-      },
+      data: partidos,
     });
   } catch (error) {
     logger.error(`Error al obtener partidos: ${error.message}`);

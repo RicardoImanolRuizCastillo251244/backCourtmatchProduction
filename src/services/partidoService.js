@@ -114,11 +114,9 @@ const crearPartido = async (payload, idCreador) => {
 };
 
 /**
- * Obtener todos los partidos con paginación
+ * Obtener todos los partidos (sin paginación)
  */
-const obtenerPartidos = async (page = 1, limit = 10, estado) => {
-  const offset = (page - 1) * limit;
-
+const obtenerPartidos = async (estado) => {
   const estadosValidos = ['programado', 'en_curso', 'finalizado', 'cancelado'];
   const where = {};
 
@@ -139,7 +137,7 @@ const obtenerPartidos = async (page = 1, limit = 10, estado) => {
     where.estado = ['programado', 'en_curso', 'finalizado'];
   }
 
-  const partidos = await Partido.findAndCountAll({
+  const partidos = await Partido.findAll({
     include: [
       { 
         model: Deporte, 
@@ -159,8 +157,6 @@ const obtenerPartidos = async (page = 1, limit = 10, estado) => {
       ]
     },
     where,
-    limit,
-    offset,
     order: [['fecha', 'ASC'], ['hora', 'ASC']],
   });
 
