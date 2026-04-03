@@ -18,7 +18,7 @@ const login = async (req, res, next) => {
         refreshToken: data.refreshToken,
         user: {
           idUser: data.idUser,
-          correo: data.correo,
+          nombreUsuario: data.nombreUsuario,
         },
         expiresIn: data.expiresIn,
       },
@@ -26,7 +26,7 @@ const login = async (req, res, next) => {
         token: data.token,
         refreshToken: data.refreshToken,
         idUser: data.idUser,
-        correo: data.correo,
+        nombreUsuario: data.nombreUsuario,
         expiresIn: data.expiresIn,
       },
     });

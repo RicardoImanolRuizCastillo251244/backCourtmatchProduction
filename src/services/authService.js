@@ -47,7 +47,7 @@ const login = async ({ correo, contrasena }) => {
 
   // Crear token de acceso
   const token = jwt.sign(
-    { id: jugador.idUser, usuario: jugador.correo },
+    { id: jugador.idUser, usuario: jugador.nombreUsuario },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRE_TIME }
   );
@@ -65,7 +65,7 @@ const login = async ({ correo, contrasena }) => {
     token,
     refreshToken,
     idUser: jugador.idUser,
-    correo: jugador.correo,
+    nombreUsuario: jugador.nombreUsuario,
     expiresIn: JWT_EXPIRE_TIME,
   };
 };
@@ -87,12 +87,12 @@ const refreshAccessToken = async (refreshToken) => {
     }
 
     const newToken = jwt.sign(
-      { id: jugador.idUser, usuario: jugador.correo },
+      { id: jugador.idUser, usuario: jugador.nombreUsuario },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRE_TIME }
     );
 
-    logger.info(`Token refrescado para usuario: ${jugador.correo}`);
+    logger.info(`Token refrescado para usuario: ${jugador.nombreUsuario}`);
 
     return {
       token: newToken,
